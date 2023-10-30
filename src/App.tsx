@@ -12,7 +12,7 @@ function App() {
   axios.defaults.params = {
     "access_key": process.env.REACT_APP_ACCESS_TOKEN
   }
-  axios.defaults.baseURL = `http://api.weatherstack.com/`
+  axios.defaults.baseURL = `https://api.weatherstack.com/`
   return (
     <div>
       <ToastContainer
