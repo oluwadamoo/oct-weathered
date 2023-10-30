@@ -140,10 +140,15 @@ function Home() {
                         longitude: position.coords.longitude,
                     };
 
-                    const temp: any = await getTemp(`${userLocation.latitude}, ${userLocation.longitude}`, abortController, false)
+                    try {
+                        const temp: any = await getTemp(`${userLocation.latitude}, ${userLocation.longitude}`, abortController, false)
 
-                    setUserLoc(temp)
-                    setShowModal(true)
+                        setUserLoc(temp)
+                        setShowModal(true)
+
+                    } catch (error) {
+                        console.log(error)
+                    }
 
                 },
                 (error) => {
