@@ -28,18 +28,6 @@ const INITCITIES = [
 ]
 
 
-// interface IData {
-//     name: string;
-//     main: {
-//         temp: number;
-//         feels_like: number;
-//         humidity: number;
-//         pressure: number;
-//     },
-//     sys: {
-//         country: string;
-//     }
-// }
 
 interface IData {
     city: string;
@@ -200,11 +188,11 @@ function Home() {
         if (city) {
             const temp = await getTemp(city)
 
-            if (temp.current) {
+            if (temp) {
                 setFilteredTemps([{
-                    city: temp?.location?.name,
-                    country: temp?.location?.country,
-                    temperature: temp?.current?.temperature
+                    city: temp.name,
+                    country: temp.sys.country,
+                    temperature: temp.main.temp
                 }])
             }
         } else {
