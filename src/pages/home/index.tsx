@@ -28,6 +28,19 @@ const INITCITIES = [
 ]
 
 
+// interface IData {
+//     name: string;
+//     main: {
+//         temp: number;
+//         feels_like: number;
+//         humidity: number;
+//         pressure: number;
+//     },
+//     sys: {
+//         country: string;
+//     }
+// }
+
 interface IData {
     city: string;
     country: string;
@@ -56,7 +69,7 @@ function Home() {
         }
         try {
 
-            const response = await axios.get(`current?query=${query}`, {
+            const response = await axios.get(`weather?q=${query}`, {
                 signal: abortController ? abortController.signal : undefined
             })
 
@@ -73,27 +86,29 @@ function Home() {
 
     const getInitTemperatures = async (abortController: AbortController) => {
         setPageLoading(true)
+
+
         for (const [index, city] of INITCITIES.entries()) {
             const temp = await getTemp(city, abortController, true)
-            if (!temperatures.find((temperature) => temperature.city === temp.location.name)) {
+            if (!temperatures.find((temperature) => temperature.city === temp.name)) {
 
-                if (temp?.location) {
+                if (temp) {
                     setTemperatures((prev) => [...prev, {
-                        city: temp?.location?.name,
-                        country: temp?.location?.country,
-                        temperature: temp?.current?.temperature
+                        city: temp.name,
+                        country: temp.sys.country,
+                        temperature: temp.main.temp
                     }])
 
                     setFilteredTemps((prev) => [...prev, {
-                        city: temp?.location?.name,
-                        country: temp?.location?.country,
-                        temperature: temp?.current?.temperature
+                        city: temp.name,
+                        country: temp.sys.country,
+                        temperature: temp.main.temp
                     }])
+
 
                 }
 
             }
-
 
             if (index === INITCITIES.length - 1) {
                 await getLocation(abortController)
@@ -102,9 +117,6 @@ function Home() {
         }
 
         setPageLoading(false)
-
-
-
 
     }
 
@@ -141,9 +153,16 @@ function Home() {
                     };
 
                     try {
-                        const temp: any = await getTemp(`${userLocation.latitude}, ${userLocation.longitude}`, abortController, false)
 
-                        setUserLoc(temp)
+                        const temp = await axios.get(`weather?lat=${userLocation.latitude}&lon=${userLocation.longitude}`, {
+                            signal: abortController ? abortController.signal : undefined
+                        })
+
+                        setUserLoc({
+                            city: temp.data.name,
+                            country: temp.data.sys.country,
+                            temperature: temp.data.main.temp
+                        })
                         setShowModal(true)
 
                     } catch (error) {
@@ -162,7 +181,7 @@ function Home() {
 
     const openUserLoc = () => {
         setShowModal(false)
-        navigate(`/details/${userLoc.location.name}`)
+        navigate(`/details/${userLoc.city}`)
     }
 
     useEffect(() => {

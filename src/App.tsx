@@ -10,9 +10,10 @@ import { ToastContainer } from "react-toastify";
 function App() {
 
   axios.defaults.params = {
-    "access_key": process.env.REACT_APP_ACCESS_TOKEN
+    "appId": process.env.REACT_APP_ACCESS_TOKEN
   }
-  axios.defaults.baseURL = `https://api.weatherstack.com/`
+  // axios.defaults.baseURL = `https://api.weatherstack.com/`
+  axios.defaults.baseURL = `https://api.openweathermap.org/data/2.5/`
   return (
     <div>
       <ToastContainer

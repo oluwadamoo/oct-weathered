@@ -2,13 +2,14 @@ import { FaSearch } from "react-icons/fa";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { sortData } from "../utils/filters";
+import { kelvinToCelsius, sortData } from "../utils/filters";
 
 interface ITemp {
     city: string;
     country: string;
     temperature: number;
 }
+
 
 interface TableProps {
     data: ITemp[];
@@ -84,7 +85,7 @@ function Table({ data, onRemove, onSearch, searching }: TableProps) {
                                     {temp.country}
                                 </td>
                                 <td onClick={() => openDetails(temp.city)}>
-                                    {temp.temperature} °C
+                                    {kelvinToCelsius(temp.temperature)} °C
                                 </td>
                                 <td className="rm">
                                     <Button onClick={() => onRemove(temp.city)} />

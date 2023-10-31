@@ -548,8 +548,8 @@ textarea {
 
 .weather-details-header img {
   border-radius: 100%;
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
 }
 
 .air-conditions-wrapper {
@@ -830,8 +830,8 @@ textarea {
   }
 
   .weather-details-header img {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
   }
 
   .weather-details-header h3 {

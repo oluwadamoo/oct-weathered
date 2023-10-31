@@ -54,3 +54,37 @@ export function generateUUID() {
     }
     return result;
 }
+
+export function kelvinToCelsius(temp: number | undefined) {
+
+    if (temp) {
+        return (temp - 273).toFixed(2)
+
+    }
+    return temp
+
+}
+
+export function getCoordinateDirection(angle: number | undefined) {
+    angle = angle ? (angle % 360 + 360) % 360 : 0;
+
+    if ((angle >= 337.5 && angle < 360) || (angle >= 0 && angle < 22.5)) {
+        return "North";
+    } else if (angle >= 22.5 && angle < 67.5) {
+        return "North-East";
+    } else if (angle >= 67.5 && angle < 112.5) {
+        return "East";
+    } else if (angle >= 112.5 && angle < 157.5) {
+        return "South-East";
+    } else if (angle >= 157.5 && angle < 202.5) {
+        return "South";
+    } else if (angle >= 202.5 && angle < 247.5) {
+        return "South-West";
+    } else if (angle >= 247.5 && angle < 292.5) {
+        return "West";
+    } else if (angle >= 292.5 && angle < 337.5) {
+        return "North-West";
+    } else {
+        return "Invalid Angle";
+    }
+}

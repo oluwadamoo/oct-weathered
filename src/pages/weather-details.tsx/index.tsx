@@ -2,11 +2,12 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 
-import { FaCaretDown, FaCaretUp, FaCloud, FaDirections, FaHeart, FaPen, FaSave, FaSun, FaTachometerAlt, FaTemperatureLow, FaThermometerEmpty, FaTrash, FaWind } from 'react-icons/fa'
+import { FaCaretDown, FaCaretUp, FaCloud, FaDirections, FaHeart, FaPen, FaSave, FaTachometerAlt, FaTemperatureLow, FaThermometerEmpty, FaTrash, FaWind } from 'react-icons/fa'
 import { useParams } from 'react-router-dom'
-import { formatDate, generateUUID } from '../../utils/filters';
+import { formatDate, generateUUID, getCoordinateDirection, kelvinToCelsius } from '../../utils/filters';
 import { toast } from 'react-toastify';
 import Loader from '../../components/Loader';
+import { Icons } from '../../utils/icons';
 
 
 interface INotes {
@@ -17,24 +18,74 @@ interface INotes {
 
 }
 
+// interface IWeather {
+//     // current: {
+//     //     cloudcover: number;
+//     //     humidity: number;
+//     //     observation_time: string;
+//     //     feelslike: number;
+//     //     pressure: number;
+//     //     temperature: number;
+//     //     uv_index: number;
+//     //     weather_descriptions: string[];
+//     //     weather_icons: string[];
+//     //     wind_degree: number;
+//     //     wind_dir: string;
+//     //     wind_speed: 7;
+//     // },
+//     // location: {
+//     //     name: string;
+//     //     country: string
+//     // }
+//     app_temp: number;
+//     aqi: number;
+//     city_name: string;
+//     clouds: number;
+//     country_code: string;
+//     dewpt: number;
+//     dhi: number;
+//     dni: number;
+//     ghi: number;
+//     gust: number;
+//     h_angle: number;
+//     precip: number;
+//     rh: number;
+//     slp: number;
+//     temp: number;
+//     ts: number;
+//     uv: number;
+//     vis: number;
+//     weather: {
+//         description: string;
+//         code: number;
+//         icon: string;
+
+//     },
+//     wind_cdir_full: string;
+//     wind_dir: 200;
+//     wind_spd: number
+// }
+
 interface IWeather {
-    current: {
-        cloudcover: number;
+    name: string;
+    main: {
+        temp: number;
+        feels_like: number;
         humidity: number;
-        observation_time: string;
-        feelslike: number;
         pressure: number;
-        temperature: number;
-        uv_index: number;
-        weather_descriptions: string[];
-        weather_icons: string[];
-        wind_degree: number;
-        wind_dir: string;
-        wind_speed: 7;
     },
-    location: {
-        name: string;
-        country: string
+    sys: {
+        country: string;
+    },
+    weather: {
+        main: string;
+        description: string;
+        icon: string;
+    }[];
+    wind: {
+        speed: number;
+        deg: number;
+        gust: number
     }
 }
 function WeatherDetails() {
@@ -159,11 +210,12 @@ function WeatherDetails() {
         setPageLoading(true)
         try {
             setPageLoading(true)
-            const response = await axios.get(`current?query=${param}`, {
+            const response = await axios.get(`weather?q=${param}`, {
                 signal: abortController ? abortController.signal : undefined
             })
 
             const temp = response.data
+
             setWeatherDetails(temp)
             setIsFav(isFavorite())
 
@@ -180,9 +232,9 @@ function WeatherDetails() {
     const addToFavorite = () => {
         const favorites = localStorage.getItem('@w-fav-locations')
         const data = {
-            city: weatherDetails?.location.name,
-            country: weatherDetails?.location.country,
-            temperature: weatherDetails?.current.temperature
+            city: weatherDetails?.name,
+            country: weatherDetails?.sys.country,
+            temperature: weatherDetails?.main.temp
         }
 
 
@@ -217,7 +269,7 @@ function WeatherDetails() {
         if (favorites) {
             const locations = JSON.parse(favorites)
 
-            if (locations.find((location: any) => location.city === weatherDetails?.location.name)) {
+            if (locations.find((location: any) => location.city === weatherDetails?.name)) {
                 return true
             } else {
                 return false
@@ -240,6 +292,9 @@ function WeatherDetails() {
         }
     }, [])
 
+    // @ts-ignore
+    const icon = Icons[weatherDetails?.weather[0].icon]
+    console.log(icon)
     return (
         <div className="container">
             {
@@ -248,12 +303,13 @@ function WeatherDetails() {
                         <section className='weather-details'>
                             <div className='weather-details-header'>
                                 <div>
-                                    <h3>{weatherDetails?.location.name} {"  "} (<FaCloud /> {' '}{weatherDetails?.current.weather_descriptions})</h3>
+                                    <h3>{weatherDetails?.name} {"  "} (<FaCloud /> {' '}{weatherDetails?.weather[0].description})</h3>
 
-                                    <h2>{weatherDetails?.current.temperature}°C</h2>
+                                    <h2>{kelvinToCelsius(weatherDetails?.main.temp)}°C</h2>
                                 </div>
 
-                                <img alt='weather-icon' src={weatherDetails?.current.weather_icons[0]} />
+
+                                <img alt='weather-icon' src={icon} />
                             </div>
 
                             <div className={`fav ${isFav ? 'is-fav' : 'not-fav'}`} onClick={addToFavorite}>
@@ -270,7 +326,7 @@ function WeatherDetails() {
                                             Real Feel
                                         </div>
 
-                                        <h5>{weatherDetails?.current.feelslike} °C</h5>
+                                        <h5>{kelvinToCelsius(weatherDetails?.main.feels_like)} °C</h5>
                                     </div>
                                     <div className='air-condition'>
 
@@ -279,7 +335,7 @@ function WeatherDetails() {
                                             Wind
                                         </div>
 
-                                        <h5>{weatherDetails?.current.wind_speed} km/hr</h5>
+                                        <h5>{weatherDetails?.wind.speed} km/hr</h5>
                                     </div>
                                     <div className='air-condition'>
 
@@ -288,7 +344,7 @@ function WeatherDetails() {
                                             Wind Direction
                                         </div>
 
-                                        <h5>{weatherDetails?.current.wind_dir}</h5>
+                                        <h5>{getCoordinateDirection(weatherDetails?.wind.deg)}</h5>
                                     </div>
                                     <div className='air-condition'>
 
@@ -297,15 +353,7 @@ function WeatherDetails() {
                                             Wind Degree
                                         </div>
 
-                                        <h5>{weatherDetails?.current.wind_degree}°</h5>
-                                    </div>
-                                    <div className='air-condition'>
-                                        <div>
-                                            <FaSun />
-                                            UV Index
-                                        </div>
-
-                                        <h5>{weatherDetails?.current.uv_index}</h5>
+                                        <h5>{weatherDetails?.wind.deg}°</h5>
                                     </div>
                                     <div className='air-condition'>
                                         <div>
@@ -313,7 +361,7 @@ function WeatherDetails() {
                                             Humidity
                                         </div>
 
-                                        <h5>{weatherDetails?.current.humidity}%</h5>
+                                        <h5>{weatherDetails?.main.humidity}%</h5>
                                     </div>
                                     <div className='air-condition'>
                                         <div>
@@ -321,7 +369,7 @@ function WeatherDetails() {
                                             Pressure
                                         </div>
 
-                                        <h5>{weatherDetails?.current.pressure}MB</h5>
+                                        <h5>{weatherDetails?.main.pressure}MB</h5>
                                     </div>
                                 </div>
                             </div>
